@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Polarity Shooter – Vertical Shmup</title>
+  <meta name="description" content="Polarity Shooter – przeglądarkowa gra shoot'em up z mechaniką polaryzacji kolorów." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Share+Tech+Mono&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css?v=2" />
+</head>
+<body>
+  <div id="app">
+
+    <!-- ── Title Screen ──────────────────────────────────────────────── -->
+    <div id="titleScreen">
+      <div class="title-inner">
+        <h1 class="title-logo">POLARITY<br/><span class="title-sub">SHOOTER</span></h1>
+        <p class="title-tagline">Absorb. Switch. Destroy.</p>
+
+        <div class="title-controls">
+          <div class="control-col">
+            <h3>Klawiatura</h3>
+            <div class="ctrl-row"><span class="key">← → ↑ ↓</span><span>Ruch</span></div>
+            <div class="ctrl-row"><span class="key">Z</span><span>Strzał</span></div>
+            <div class="ctrl-row"><span class="key">X</span><span>Zmiana koloru</span></div>
+          </div>
+          <div class="control-col">
+            <h3>Gamepad</h3>
+            <div class="ctrl-row"><span class="key">D-pad / L-Stick</span><span>Ruch</span></div>
+            <div class="ctrl-row"><span class="key">RT</span><span>Strzał</span></div>
+            <div class="ctrl-row"><span class="key">LT</span><span>Zmiana koloru</span></div>
+          </div>
+        </div>
+
+        <button id="startBtn" class="btn btn--start">START</button>
+        <p id="gamepadStatus" class="gamepad-status">Gamepad: nie wykryto</p>
+      </div>
+    </div>
+
+    <!-- ── Game Over Overlay ─────────────────────────────────────────── -->
+    <div id="gameOverScreen" class="overlay hidden">
+      <div class="overlay-inner">
+        <h2 class="go-title">GAME OVER</h2>
+        <p class="go-score">Wynik: <span id="finalScore">0</span></p>
+        <p class="go-wave">Fala: <span id="finalWave">1</span></p>
+        <p class="go-chain">Max Łańcuch: <span id="finalChain">0</span></p>
+        <button id="restartBtn" class="btn btn--start">RESTART</button>
+      </div>
+    </div>
+
+    <!-- ── Canvas ────────────────────────────────────────────────────── -->
+    <canvas id="gameCanvas"></canvas>
+
+  </div>
+  <script type="module" src="src/main.js?v=20260520_1"></script>
+
+  <!-- ── Background Music ──────────────────────────────────────────────── -->
+  <audio id="bgMusic" loop preload="auto">
+    <source src="assets/Polarity%20Clash.mp3" type="audio/mpeg" />
+  </audio>
+  <script>
+    const music = document.getElementById('bgMusic');
+    music.volume = 0.45;
+
+    // Browsers block autoplay until user interacts with the page
+    function startMusic() {
+      music.play().catch(() => {}); // silently ignore if blocked
+    }
+
+    // Start on any click/key/gamepad press
+    document.addEventListener('click',   startMusic, { once: true });
+    document.addEventListener('keydown',  startMusic, { once: true });
+    document.addEventListener('touchstart', startMusic, { once: true });
+
+    // Also try immediately (works on some browsers when tab is active)
+    startMusic();
+  </script>
+</body>
+</html>

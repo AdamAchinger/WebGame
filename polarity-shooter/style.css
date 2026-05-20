@@ -1,0 +1,179 @@
+/* ── Reset ──────────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:        #050508;
+  --surface:   #0c0c14;
+  --white-pol: #e0f0ff;
+  --white-glow: rgba(160, 210, 255, 0.7);
+  --black-pol: #1a1a2e;
+  --black-glow: rgba(255, 60, 120, 0.7);
+  --cyan:      #00e5ff;
+  --magenta:   #ff2d78;
+  --text:      #d0d8e8;
+  --muted:     #556080;
+  --gold:      #ffd740;
+}
+
+html, body {
+  width: 100%; height: 100%;
+  overflow: hidden;
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Share Tech Mono', monospace;
+}
+
+/* ── App / Canvas ──────────────────────────────────────────────────── */
+#app {
+  position: relative;
+  width: 100vw; height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#gameCanvas {
+  display: block;
+  width: 100%; height: 100%;
+  image-rendering: crisp-edges;
+}
+
+/* ── Title Screen ──────────────────────────────────────────────────── */
+#titleScreen {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  background: transparent;
+  z-index: 20;
+  padding: 24px;
+}
+
+.title-inner {
+  display: flex; flex-direction: column; align-items: center; gap: 28px;
+  max-width: 640px; width: 100%;
+}
+
+.title-logo {
+  font-family: 'Press Start 2P', monospace;
+  font-size: clamp(1.4rem, 4vw, 2.8rem);
+  font-weight: 400;
+  letter-spacing: 0;
+  text-align: center;
+  line-height: 1.1;
+  background: linear-gradient(135deg, var(--cyan), #fff, var(--magenta));
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 0 30px rgba(0, 229, 255, 0.4))
+          drop-shadow(0 0 60px rgba(255, 45, 120, 0.3));
+  animation: titlePulse 3s ease-in-out infinite;
+}
+
+.title-sub {
+  font-size: 0.55em;
+  letter-spacing: 0.35em;
+}
+
+.title-tagline {
+  font-size: 1rem;
+  color: var(--muted);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+
+/* Controls grid */
+.title-controls {
+  display: flex; gap: 40px; flex-wrap: wrap; justify-content: center;
+  background: rgba(12, 12, 20, 0.8);
+  border: 1px solid rgba(0, 229, 255, 0.15);
+  border-radius: 14px;
+  padding: 20px 28px;
+}
+
+.control-col { display: flex; flex-direction: column; gap: 8px; min-width: 200px; }
+.control-col h3 {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.6rem; font-weight: 400;
+  color: var(--cyan); letter-spacing: 0;
+  text-transform: uppercase; margin-bottom: 8px;
+  line-height: 1.4;
+}
+
+.ctrl-row {
+  display: flex; align-items: center; gap: 12px; font-size: 0.85rem;
+}
+
+.key {
+  background: var(--surface);
+  border: 1px solid rgba(0, 229, 255, 0.25);
+  border-radius: 5px;
+  padding: 3px 10px;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.8rem;
+  color: var(--cyan);
+  white-space: nowrap;
+}
+
+/* Start button */
+.btn--start {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 1rem; font-weight: 400;
+  letter-spacing: 0;
+  padding: 16px 40px;
+  border: 2px solid var(--cyan);
+  border-radius: 4px;
+  background: transparent;
+  color: var(--cyan);
+  cursor: pointer;
+  transition: all 0.2s;
+  text-transform: uppercase;
+}
+
+.btn--start:hover {
+  background: rgba(0, 229, 255, 0.12);
+  box-shadow: 0 0 30px rgba(0, 229, 255, 0.3), inset 0 0 20px rgba(0, 229, 255, 0.08);
+  transform: scale(1.03);
+}
+
+.btn--start:active { transform: scale(0.97); }
+
+.gamepad-status {
+  font-size: 0.75rem; color: var(--muted);
+  letter-spacing: 0.05em;
+}
+
+/* ── Overlays ──────────────────────────────────────────────────────── */
+.overlay {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(5, 5, 8, 0.88);
+  z-index: 30;
+  backdrop-filter: blur(6px);
+}
+
+.overlay.hidden { display: none; }
+
+.overlay-inner {
+  display: flex; flex-direction: column; align-items: center; gap: 20px;
+  text-align: center;
+}
+
+.go-title {
+  font-family: 'Press Start 2P', monospace;
+  font-size: clamp(1.2rem, 4vw, 2.5rem);
+  font-weight: 400; letter-spacing: 0;
+  color: var(--magenta);
+  text-shadow: 0 0 40px rgba(255, 45, 120, 0.6);
+}
+
+.go-score, .go-wave, .go-chain {
+  font-size: 1.1rem; color: var(--text);
+}
+
+.go-score span { color: var(--gold); font-weight: 700; font-size: 1.4rem; }
+.go-wave span  { color: var(--cyan); }
+.go-chain span { color: var(--magenta); }
+
+/* ── Animations ────────────────────────────────────────────────────── */
+@keyframes titlePulse {
+  0%, 100% { filter: drop-shadow(0 0 30px rgba(0,229,255,0.4)) drop-shadow(0 0 60px rgba(255,45,120,0.3)); }
+  50%      { filter: drop-shadow(0 0 50px rgba(0,229,255,0.6)) drop-shadow(0 0 90px rgba(255,45,120,0.5)); }
+}
