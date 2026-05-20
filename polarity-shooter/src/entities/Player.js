@@ -150,9 +150,9 @@ export class Player extends Entity {
     return bullets;
   }
 
-  die() {
+  die(livesToLose = 1) {
     this._deathPos.set(this.position.x, this.position.y);
-    this.lives--;
+    this.lives -= livesToLose;
     this.chain = 0;
     if (this.lives <= 0) {
       this.isAlive = false;

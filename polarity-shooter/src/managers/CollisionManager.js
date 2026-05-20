@@ -1,8 +1,8 @@
 /**
- * CollisionManager – Ikaruga-style polarity rules.
+ * CollisionManager – Custom polarity rules.
  *
- * BLUE player: destroys RED enemies, immune to BLUE bullets, DOUBLE damage from RED
- * RED player:  destroys BLUE enemies, immune to RED bullets, DOUBLE damage from BLUE
+ * BLUE player: destroys BLUE enemies, immune to BLUE bullets, DOUBLE damage from RED
+ * RED player:  destroys RED enemies, immune to RED bullets, DOUBLE damage from BLUE
  */
 import { SCORE } from '../constants.js';
 import { soundManager } from './SoundManager.js';
@@ -24,7 +24,7 @@ export class CollisionManager {
   /**
    * Enemy bullets vs player:
    *   SAME polarity → absorbed (immune + bonus)
-   *   OPPOSITE polarity → double damage (die)
+   *   OPPOSITE polarity → double damage (lose 2 lives)
    */
   _playerVsEnemyBullets(enemyBullets) {
     const p = this.player;
@@ -47,11 +47,11 @@ export class CollisionManager {
           this.particles.spawnAbsorb(b.position.x, b.position.y, b.polarity);
           soundManager.playHit(); // Absorb sound
         } else {
-          // OPPOSITE polarity → DOUBLE DAMAGE (instant death)
+          // OPPOSITE polarity → DOUBLE DAMAGE (lose 2 lives)
           b.isAlive = false;
           this.particles.spawnPlayerDeath(p.position.x, p.position.y);
           soundManager.playExplosion();
-          p.die();
+          p.die(2);
           return;
         }
       }
@@ -71,10 +71,10 @@ export class CollisionManager {
         if (!e.isAlive) continue;
         if (!b.collidesWith(e)) continue;
 
-        // Same polarity → passes through (ineffective)
-        if (b.polarity === e.polarity) continue;
+        // Opposite polarity → passes through (ineffective)
+        if (b.polarity !== e.polarity) continue;
 
-        // Opposite polarity → deal damage
+        // Same polarity → deal damage
         e.takeDamage(b.damage);
         b.isAlive = false;
 
@@ -95,7 +95,7 @@ export class CollisionManager {
   /**
    * Player body vs enemies:
    *   SAME polarity → safe (pass through)
-   *   OPPOSITE polarity → die
+   *   OPPOSITE polarity → double damage (lose 2 lives)
    */
   _playerVsEnemies(enemies) {
     const p = this.player;
@@ -114,7 +114,7 @@ export class CollisionManager {
       if (dist < minDist * minDist) {
         this.particles.spawnPlayerDeath(p.position.x, p.position.y);
         soundManager.playExplosion();
-        p.die();
+        p.die(2);
         return;
       }
     }

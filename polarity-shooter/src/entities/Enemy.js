@@ -262,25 +262,31 @@ export class Enemy extends Entity {
     const { x, y } = this.position;
     const spd = ENEMY.BULLET_SPEED;
     
-    // Calculate angle towards player
+    // Shoot forward (in moveDir direction)
+    const forwardAngle = Math.atan2(this.moveDir.y, this.moveDir.x);
+    const dirX = Math.cos(forwardAngle);
+    const dirY = Math.sin(forwardAngle);
+
+    // Calculate direction towards player (used for turret and sniper targeting)
     const angleToPlayer = Math.atan2(playerPos.y - y, playerPos.x - x);
-    const dirX = Math.cos(angleToPlayer);
-    const dirY = Math.sin(angleToPlayer);
+    const playerDirX = Math.cos(angleToPlayer);
+    const playerDirY = Math.sin(angleToPlayer);
 
     switch (this.type) {
       case ENEMY_TYPE.GRUNT:
       case ENEMY_TYPE.LOOPER:
       case ENEMY_TYPE.SWOOPER: {
-        // Machine gun: single shot but with slight inaccuracy for a spray effect
-        const spray = angleToPlayer + (Math.random() - 0.5) * 0.2;
+        // Machine gun: single shot forward (in moveDir) with slight inaccuracy
+        const spray = forwardAngle + (Math.random() - 0.5) * 0.2;
         return [this._mkBullet(x, y, Math.cos(spray) * spd, Math.sin(spray) * spd, 4)];
       }
 
       case ENEMY_TYPE.ORBITER: {
         const bullets = [];
         if (this.age > 1.5 && this.age < 3.0) {
-          for (let i = -2; i <= 3; i++) {
-            const a = angleToPlayer + (Math.PI / 8) * i;
+          // Orbiter: fires a fan in its forward direction
+          for (let i = -2; i <= 2; i++) {
+            const a = forwardAngle + (Math.PI / 8) * i;
             bullets.push(this._mkBullet(x, y, Math.cos(a) * spd * 0.8, Math.sin(a) * spd * 0.8, 4));
           }
         }
@@ -288,7 +294,7 @@ export class Enemy extends Entity {
       }
 
       case ENEMY_TYPE.FLANKER: {
-        // Fast planes: Twin-linked fast shots
+        // Fast planes: Twin-linked fast shots forward (in moveDir)
         const px = -dirY * 8, py = dirX * 8;
         return [
           this._mkBullet(x + px, y + py, dirX * spd * 1.5, dirY * spd * 1.5, 3),
@@ -297,30 +303,29 @@ export class Enemy extends Entity {
       }
 
       case ENEMY_TYPE.TANK: {
-        // Bombs: Heavy 8-way slow expanding ring
-        const bullets = [];
-        for (let i = 0; i < 8; i++) {
-          const a = (Math.PI * 2 / 8) * i;
-          bullets.push(this._mkBullet(x, y, Math.cos(a) * spd * 0.4, Math.sin(a) * spd * 0.4, 7)); // larger radius, slow
-        }
-        return bullets;
+        // Bombs: Heavy double shot forward (in moveDir)
+        const px = -dirY * 12, py = dirX * 12;
+        return [
+          this._mkBullet(x + px, y + py, dirX * spd * 0.5, dirY * spd * 0.5, 7),
+          this._mkBullet(x - px, y - py, dirX * spd * 0.5, dirY * spd * 0.5, 7)
+        ];
       }
 
       case ENEMY_TYPE.ROTATING_LASER: {
-        // Stationary turret
+        // Turret: fires spinning ring and aimed shot at player
         const bullets = [];
         const count = 6;
         for (let i = 0; i < count; i++) {
           const a = this._spinAngle + (Math.PI * 2 / count) * i;
           bullets.push(this._mkBullet(x, y, Math.cos(a) * spd * 0.7, Math.sin(a) * spd * 0.7, 4));
         }
-        bullets.push(this._mkBullet(x, y, dirX * spd * 1.1, dirY * spd * 1.1, 5)); 
+        bullets.push(this._mkBullet(x, y, playerDirX * spd * 1.1, playerDirY * spd * 1.1, 5)); 
         return bullets;
       }
 
       case ENEMY_TYPE.SNIPER: {
-        // Burst firing: Fires 1 fast bullet (burst loop handles the 5 shots)
-        return [this._mkBullet(x, y, dirX * spd * 1.6, dirY * spd * 1.6, 3)];
+        // Sniper: shoots aimed burst towards player
+        return [this._mkBullet(x, y, playerDirX * spd * 1.6, playerDirY * spd * 1.6, 3)];
       }
 
       default:

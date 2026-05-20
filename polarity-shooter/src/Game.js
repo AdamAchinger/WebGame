@@ -201,7 +201,16 @@ export class Game {
           // Only hit if player is in front of the laser (dot product > 0)
           const dot  = dx * lx + dy * ly;
           if (perp < 14 && dot > 0) {
-            this.player.takeDamage(1);
+            if (e._attackPolarity === this.player.polarity) {
+              // Same polarity: safe / absorb
+              this.player.onAbsorb();
+              this.particles.spawnAbsorb(this.player.position.x, this.player.position.y, e._attackPolarity);
+            } else {
+              // Opposite polarity: double damage (lose 2 lives)
+              this.particles.spawnPlayerDeath(this.player.position.x, this.player.position.y);
+              soundManager.playExplosion();
+              this.player.die(2);
+            }
           }
         }
       }
